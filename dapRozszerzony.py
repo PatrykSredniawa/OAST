@@ -1,12 +1,12 @@
 import numpy as np
 import random
 
-# --- KONFIGURACJA (Zgodnie z wymaganiami: MAX_GEN=10, Wynik=2) ---
+# --- KONFIGURACJA ---
 N = 20          # Rozmiar populacji P(n)
 K_ops = 10      # K operacji (generuje 20 potomków)
-P_CH_MU = 0.3   # Prawdopodobieństwo mutacji chromosomu
-P_GENE_MU = 0.3 # Prawdopodobieństwo mutacji genu
-MAX_GEN = 10    # Limit generacji
+P_CH_MU = 0.1   # Prawdopodobieństwo mutacji chromosomu
+P_GENE_MU = 0.1 # Prawdopodobieństwo mutacji genu
+MAX_GEN = 100    # Limit generacji
 
 LINKS_CAP = {1: 4, 2: 4, 3: 2, 4: 4, 5: 4}
 
