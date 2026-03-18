@@ -6,7 +6,7 @@ N = 20
 K_ops = 10      
 P_CH_MU = 0.1   
 P_GENE_MU = 0.1 
-MAX_GEN = 100   
+MAX_GEN = 10   
 
 # --- DANE WEJŚCIOWE DDAP ---
 MOD_CAP = 1     # param moduleCapacity := 1

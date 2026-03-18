@@ -5,7 +5,7 @@ N = 20          # Rozmiar populacji (N)
 K_ops = 10      # Liczba operacji (K), generuje 20 potomków 
 P_CH_MU = 0.1   # p - prawdopodobieństwo mutacji chromosomu 
 P_GENE_MU = 0.1 # q - prawdopodobieństwo mutacji genu 
-MAX_GEN = 100   # Zwiększone dla stabilności przy losowej selekcji 
+MAX_GEN = 10  # Zwiększone dla stabilności przy losowej selekcji 
 
 # --- DANE WEJŚCIOWE (Zgodnie z plikiem AMPL) ---
 LINKS_CAP = {1: 4, 2: 4, 3: 2, 4: 4, 5: 4}
