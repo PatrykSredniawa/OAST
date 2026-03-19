@@ -1,18 +1,12 @@
 import random
 import copy
 
-# --- PARAMETRY (NIEPODLEGAJĄCE NEGOCJACJI) ---
+# --- STAŁE PARAMETRY ---
 N = 20          
 K_ops = 10      
 P_CH_MU = 0.1   
 P_GENE_MU = 0.1 
 MAX_GEN = 10    
-
-# --- KONFIGURACJA ROZSZERZENIA ---
-# SELECTION: 'random' (standard), 'tournament' (turniejowa), 'ranking' (rankingowa)
-# MUTATION: 'shift' (przesunięcie jednostki), 'swap' (zamiana wartości ścieżek)
-SELECTED_SELECTION = 'random'
-SELECTED_MUTATION = 'swap'
 
 MODULE_CAPACITY = 1
 LINKS = {
@@ -64,17 +58,18 @@ class Chromosome:
     def __lt__(self, other):
         return self.fitness < other.fitness
 
-# --- NOWE METODY DOBORU PAR ---
+# --- METODY DOBORU PAR ---
 def get_parent(pop, method):
     if method == 'tournament':
         contestants = random.sample(pop, 2)
         return min(contestants)
     elif method == 'ranking':
+        # Waga zależna od pozycji w posortowanej liście (im mniejszy index, tym wyższa waga)
         weights = list(range(len(pop), 0, -1))
         return random.choices(pop, weights=weights, k=1)[0]
-    return random.choice(pop)
+    return random.choice(pop) # 'random'
 
-# --- NOWE METODY MUTACJI ---
+# --- METODY MUTACJI ---
 def mutate_op(chrom, method):
     if random.random() > P_CH_MU: return chrom
     new_genes = copy.deepcopy(chrom.genes)
@@ -86,32 +81,50 @@ def mutate_op(chrom, method):
                     idx1, idx2 = random.sample(range(len(f)), 2)
                     f[idx1], f[idx2] = f[idx2], f[idx1]
                 else: # 'shift'
-                    src = random.choice([idx for idx, v in enumerate(f) if v > 0] or [0])
+                    sources = [idx for idx, v in enumerate(f) if v > 0]
+                    src = random.choice(sources) if sources else 0
                     dst = random.choice([idx for idx in range(len(f)) if idx != src])
-                    if f[src] > 0: f[src] -= 1; f[dst] += 1
+                    if f[src] > 0:
+                        f[src] -= 1
+                        f[dst] += 1
     return Chromosome(chrom.mode, new_genes)
 
-def run_solver(mode):
-    print(f"\n{'='*20} TRYB: {mode} (S:{SELECTED_SELECTION}, M:{SELECTED_MUTATION}) {'='*20}")
+# --- GŁÓWNA FUNKCJA Z ARGUMENTAMI KONFIGURACYJNYMI ---
+def run_solver(mode, selection_method, mutation_method):
+    print(f"\n{'='*20} TRYB: {mode} {'='*20}")
+    print(f"Konfiguracja: Selekcja={selection_method}, Mutacja={mutation_method}")
+    
+    # Inicjalizacja P(0) - lista uporządkowana
     pop = sorted([Chromosome(mode) for _ in range(N)])
     
     for n in range(1, MAX_GEN + 1):
         O = []
         for _ in range(K_ops):
-            p1 = get_parent(pop, SELECTED_SELECTION)
-            p2 = get_parent(pop, SELECTED_SELECTION)
-            # Uniform Crossover
+            p1 = get_parent(pop, selection_method)
+            p2 = get_parent(pop, selection_method)
+            
+            # Krzyżowanie (Uniform Crossover)
             c1_g, c2_g = [], []
             for g1, g2 in zip(p1.genes, p2.genes):
                 if random.random() < 0.5:
-                    c1_g.append(copy.deepcopy(g1)); c2_g.append(copy.deepcopy(g2))
+                    c1_g.append(copy.deepcopy(g1))
+                    c2_g.append(copy.deepcopy(g2))
                 else:
-                    c1_g.append(copy.deepcopy(g2)); c2_g.append(copy.deepcopy(g1))
-            O.extend([mutate_op(Chromosome(mode, c1_g), SELECTED_MUTATION), 
-                      mutate_op(Chromosome(mode, c2_g), SELECTED_MUTATION)])
+                    c1_g.append(copy.deepcopy(g2))
+                    c2_g.append(copy.deepcopy(g1))
+            
+            # Tworzenie potomstwa z mutacją
+            child1 = mutate_op(Chromosome(mode, c1_g), mutation_method)
+            child2 = mutate_op(Chromosome(mode, c2_g), mutation_method)
+            O.extend([child1, child2])
         
+        # Sortowanie O (lista uporządkowana) wg Slajdu 17
+        O.sort()
+        
+        # Sukcesja (N+K): N najlepszych z połączonej puli
         pop = sorted(pop + O)[:N]
-        print(f"Gen {n}: Best Fitness = {pop[0].fitness}")
+        if n % 2 == 0:
+            print(f"Gen {n}: Best Fitness = {pop[0].fitness}")
 
     best = pop[0]
     print(f"\n--- WYNIKI KOŃCOWE {mode} ---")
@@ -122,9 +135,21 @@ def run_solver(mode):
     else:
         print("LINK | LOAD | MODS | COST")
         for l in sorted(LINKS.keys()):
-            print(f"{l:<4} | {best.link_loads[l]:<4} | {best.extra[l]:<4} | {best.extra[l]*LINKS[l]['cost_ddap']}")
-    print(f"Funkcja celu: {best.fitness}")
+            mods = best.extra[l]
+            print(f"{l:<4} | {best.link_loads[l]:<4} | {mods:<4} | {mods * LINKS[l]['cost_ddap']}")
+    print(f"Final Fitness: {best.fitness}")
 
 if __name__ == "__main__":
-    for m in ['DAP', 'DDAP']:
-        run_solver(m)
+    # TUTAJ MOŻESZ WYBRAĆ RÓŻNE METODY DLA KAŻDEGO TRYBU
+    
+    # Przykład: DAP z turniejem i przesunięciem (shift)
+    run_solver(mode='DAP', 
+               selection_method='ranking', 
+               mutation_method='shift')
+    
+    print("\n" + "*"*50)
+    
+    # Przykład: DDAP z rankingiem i zamianą (swap)
+    run_solver(mode='DDAP', 
+               selection_method='ranking', 
+               mutation_method='shift')

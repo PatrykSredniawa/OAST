@@ -1,7 +1,7 @@
 import random
 import copy
 
-# --- PARAMETRY (NIEPODLEGAJĄCE NEGOCJACJI) ---
+# --- PARAMETRY ---
 N = 20          # Rozmiar populacji P(n)
 K_ops = 10      # K operacji (generuje 2K potomków)
 P_CH_MU = 0.1   # Prawdopodobieństwo mutacji chromosomu
