@@ -160,25 +160,26 @@ def run_EA(mode="DAP", generations=GENERATIONS, crossover_op=crossover_uniform, 
     return scored[0], history
 
 def plot_results(all_histories):
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 5))
     
     # Wykres dla DAP
     plt.subplot(1, 2, 1)
     for label, history in all_histories["DAP"]:
-        plt.plot(history, label=label)
-    plt.title("Zbieżność DAP (Minimalizacja przeciążenia)")
-    plt.xlabel("Generacja")
-    plt.ylabel("F(x) - Max Overload")
+        # Dodajemy 'go-' dla zielonej linii z kropkami
+        plt.plot(history, 'go-', label=label, markersize=4, markevery=10)
+    plt.title("DAP Optimization Trajectory")
+    plt.xlabel("Generation")
+    plt.ylabel("Best chromosome fitness")
     plt.legend()
     plt.grid(True)
 
     # Wykres dla DDAP
     plt.subplot(1, 2, 2)
     for label, history in all_histories["DDAP"]:
-        plt.plot(history, label=label)
-    plt.title("Zbieżność DDAP (Minimalizacja kosztu)")
-    plt.xlabel("Generacja")
-    plt.ylabel("F(x) - Całkowity Koszt")
+        plt.plot(history, 'go-', label=label, markersize=4, markevery=10)
+    plt.title("DDAP Optimization Trajectory")
+    plt.xlabel("Generation")
+    plt.ylabel("Best chromosome fitness")
     plt.legend()
     plt.grid(True)
 
